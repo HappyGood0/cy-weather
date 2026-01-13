@@ -19,7 +19,7 @@ jobs:
           # --build : Reconstruit l'image avec le dernier code
           # --exit-code-from : Fait échouer GitHub si test.py échoue
           # --abort-on-container-exit : Arrête l'API une fois le test fini
-          docker-compose up --build \
+          docker compose up --build \
             --exit-code-from api-tests \
             --abort-on-container-exit \
             api api-tests
