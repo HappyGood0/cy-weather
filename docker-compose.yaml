@@ -1,5 +1,47 @@
 services:
   # Service API Backend (FastAPI)
+  api-tests:
+    build:
+      context: ./api
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_URL=http://api:8000  # Permet à test.py de savoir où est l'API
+    depends_on:
+      api:
+        condition: service_healthy
+    # Commande pour lancer spécifiquement votre fichier
+    # On utilise 'pytest' (recommandé) ou 'python test.py'
+    command: python test.py
+    networks:
+      - cy-weather-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    networks:
+      - monitoring
   api:
     build:
       context: ./api
@@ -18,6 +60,7 @@ services:
       start_period: 40s
     networks:
       - cy-weather-network
+      - monitoring
 
   # Service Frontend Web (Vue.js + Nginx)
   web:
@@ -40,6 +83,11 @@ services:
     networks:
       - cy-weather-network
 
+volumes:
+  prom_data:
+
 networks:
+  monitoring:
+    driver: bridge
   cy-weather-network:
     driver: bridge

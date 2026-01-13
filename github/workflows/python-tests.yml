@@ -1,0 +1,25 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Lancement des tests
+        run: |
+          # --build : Reconstruit l'image avec le dernier code
+          # --exit-code-from : Fait échouer GitHub si test.py échoue
+          # --abort-on-container-exit : Arrête l'API une fois le test fini
+          docker-compose up --build \
+            --exit-code-from api-tests \
+            --abort-on-container-exit \
+            api api-tests

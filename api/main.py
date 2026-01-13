@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from src.resources.weather_resource import router as weather_router
-
+from prometheus_fastapi_instrumentator import Instrumentator
 
 tags_metadata = [
     {
@@ -49,3 +49,5 @@ async def health_check():
 
 app.include_router(router)
 app.include_router(weather_router, prefix="/api")
+
+Instrumentator().instrument(app).expose(app)
