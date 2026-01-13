@@ -53,11 +53,13 @@ services:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      # Utilise Python pour tester l'API au lieu de curl (plus robuste si curl n'est pas installé)
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # On laisse 30s car le démarrage en CI est souvent plus lent qu'en local
+      start_period: 30s 
     networks:
       - cy-weather-network
       - monitoring
